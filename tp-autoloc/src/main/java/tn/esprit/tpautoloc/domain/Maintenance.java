@@ -24,4 +24,9 @@ public class Maintenance {
     private LocalDate dateFin;
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule")
+    private Vehicule vehicule;
+
+
 }

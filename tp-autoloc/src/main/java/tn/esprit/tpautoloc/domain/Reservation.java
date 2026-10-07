@@ -26,4 +26,17 @@ public class Reservation {
     private LocalDate dateFin;
     private StatuReservation statut;
 
+    @ManyToOne
+    @JoinColumn(name = "id_client")
+    private Client client;
+
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule")
+    private Vehicule vehicule;
+
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private Contrat contrat;
+
+
 }

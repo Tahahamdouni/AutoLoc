@@ -23,4 +23,8 @@ public class Employe {
     private String nom;
     private String prenom;
     private RoleEmploye role;
+
+    @ManyToOne
+    @JoinColumn(name = "id_agence")
+    private Agence agence;
 }
