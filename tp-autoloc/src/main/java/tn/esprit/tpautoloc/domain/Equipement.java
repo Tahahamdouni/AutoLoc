@@ -1,4 +1,5 @@
 package tn.esprit.tpautoloc.domain;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class Equipement {
     private String libelle;
 
     @ManyToMany(mappedBy = "equipements")
+    @JsonIgnore
     private List<Vehicule> vehicules;
 
 }

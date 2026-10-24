@@ -1,4 +1,5 @@
 package tn.esprit.tpautoloc.domain;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Maintenance {
     private String description;
 
     @ManyToOne
+    @JsonBackReference("vehicule-maintenances")
     @JoinColumn(name = "id_vehicule")
     private Vehicule vehicule;
 

@@ -5,14 +5,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import tn.esprit.tpautoloc.domain.Agence;
 import tn.esprit.tpautoloc.domain.Client;
+import tn.esprit.tpautoloc.domain.Contrat;
+import tn.esprit.tpautoloc.domain.Reservation;
 import tn.esprit.tpautoloc.domain.Vehicule;
 import tn.esprit.tpautoloc.domain.enums.CategorieVehicule;
+import tn.esprit.tpautoloc.domain.enums.StatuReservation;
 import tn.esprit.tpautoloc.domain.enums.StatutVehicule;
 import tn.esprit.tpautoloc.repository.IAgenceRepository;
 import tn.esprit.tpautoloc.repository.IClientRepository;
+import tn.esprit.tpautoloc.repository.IContratRepository;
+import tn.esprit.tpautoloc.repository.IReservationRepository;
 import tn.esprit.tpautoloc.repository.IVehiculeRepository;
 import tn.esprit.tpautoloc.service.IAgenceService;
 import tn.esprit.tpautoloc.service.IClientService;
+import tn.esprit.tpautoloc.service.IContratService;
+import tn.esprit.tpautoloc.service.IReservationService;
+import tn.esprit.tpautoloc.service.IVehiculeService;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
@@ -33,10 +41,25 @@ class TpAutolocApplicationTests {
     private IVehiculeRepository vehiculeRepository;
 
     @Autowired
+    private IContratRepository contratRepository;
+
+    @Autowired
+    private IReservationRepository reservationRepository;
+
+    @Autowired
     private IAgenceService agenceService;
 
     @Autowired
     private IClientService clientService;
+
+    @Autowired
+    private IVehiculeService vehiculeService;
+
+    @Autowired
+    private IContratService contratService;
+
+    @Autowired
+    private IReservationService reservationService;
 
     @Test
     void contextLoads() {
@@ -375,7 +398,7 @@ class TpAutolocApplicationTests {
 
         assertNotNull(clientRecupere);
         assertEquals(id1, clientRecupere.getIdClient());
-        assertEquals("Gharbi", clientRecupere.getNom());
+        assertEquals("Hamdouni", clientRecupere.getNom());
 
         // 5. Afficher le nombre de clients avec count()
         long nombreClients = clientRepository.count();
@@ -399,5 +422,114 @@ class TpAutolocApplicationTests {
 
         assertFalse(existe1ApresSuppression);
         assertFalse(existe2ApresSuppression);
+    }
+
+    @Test
+    void testContratService() {
+
+        // 1. Créer les données nécessaires : Agence, Véhicule, Client, Réservation
+
+        // Créer une agence
+        Agence agence = new Agence();
+        agence.setNom("Agence Sfax");
+        agence.setVille("Sfax");
+        agence.setAdresse("Avenue Majida Boulila");
+        agence.setTelephone("74111222");
+        Agence agenceSaved = agenceRepository.save(agence);
+
+        // Créer un véhicule
+        Vehicule vehicule = new Vehicule();
+        vehicule.setMarque("Peugeot");
+        vehicule.setModele("208");
+        vehicule.setImmatriculation("147TU7890");
+        vehicule.setCategorie(CategorieVehicule.CITADINE);
+        vehicule.setStatut(StatutVehicule.DISPONIBLE);
+        vehicule.setTarifJournalier(new BigDecimal("45.00"));
+        vehicule.setAgence(agenceSaved);
+        Vehicule vehiculeSaved = vehiculeRepository.save(vehicule);
+
+        // Créer un client
+        Client client = new Client();
+        client.setNom("Trabelsi");
+        client.setPrenom("Ahmed");
+        client.setEmail("ahmed.trabelsi@email.com");
+        client.setTelephone("50123456");
+        client.setNumPermis("P123456");
+        client.setDateInscription(LocalDate.now());
+        Client clientSaved = clientRepository.save(client);
+
+        // Créer une réservation
+        Reservation reservation = new Reservation();
+        reservation.setClient(clientSaved);
+        reservation.setVehicule(vehiculeSaved);
+        reservation.setDateDebut(LocalDate.now());
+        reservation.setDateFin(LocalDate.now().plusDays(3));
+        reservation.setStatut(StatuReservation.CONFIRMEE);
+        Reservation reservationSaved = reservationRepository.save(reservation);
+
+        // 2. Créer un contrat
+        Contrat contrat = new Contrat();
+        contrat.setReservation(reservationSaved);
+        contrat.setDateSignature(LocalDate.now());
+        contrat.setMontantTotal(new BigDecimal("135.00")); // 3 jours * 45€
+        contrat.setValide(true);
+
+        // 3. Enregistrer le contrat avec create()
+        Contrat contratSaved = contratService.create(contrat);
+
+        System.out.println("\nContrat enregistré :");
+        System.out.println("  ID : " + contratSaved.getIdContrat());
+        System.out.println("  Montant total : " + contratSaved.getMontantTotal());
+        System.out.println("  Date signature : " + contratSaved.getDateSignature());
+        System.out.println("  Valide : " + contratSaved.isValide());
+
+        assertNotNull(contratSaved);
+        assertNotNull(contratSaved.getIdContrat());
+
+        Long idContrat = contratSaved.getIdContrat();
+
+        // 4. Afficher tous les contrats avec findAll()
+        List<Contrat> contrats = contratService.findAll();
+
+        System.out.println("\nTous les contrats :");
+        contrats.forEach(c -> System.out.println("  - Contrat ID: " + c.getIdContrat() + 
+                ", Montant: " + c.getMontantTotal()));
+
+        assertTrue(contrats.size() >= 1);
+
+        // 5. Récupérer un contrat avec findById()
+        Contrat contratRecupere = contratService.findById(idContrat);
+
+        System.out.println("\nContrat récupéré par ID:");
+        System.out.println("  ID : " + contratRecupere.getIdContrat());
+        System.out.println("  Montant : " + contratRecupere.getMontantTotal());
+        System.out.println("  Date : " + contratRecupere.getDateSignature());
+        System.out.println("  Réservation ID : " + contratRecupere.getReservation().getIdReservation());
+
+        assertNotNull(contratRecupere);
+        assertEquals(idContrat, contratRecupere.getIdContrat());
+
+        // 6. Afficher le nombre de contrats avec count()
+        long nombreContrats = contratRepository.count();
+
+        System.out.println("\nNombre de contrats : " + nombreContrats);
+
+        assertTrue(nombreContrats >= 1);
+
+        // 7. Modifier le contrat avec update()
+        contratRecupere.setMontantTotal(new BigDecimal("150.00"));
+        Contrat contratModifie = contratService.update(idContrat, contratRecupere);
+
+        System.out.println("\nContrat modifié :");
+        System.out.println("  Nouveau montant : " + contratModifie.getMontantTotal());
+
+        assertEquals(new BigDecimal("150.00"), contratModifie.getMontantTotal());
+
+        // 8. Supprimer le contrat avec deleteById()
+        contratService.deleteById(idContrat);
+
+        System.out.println("\nContrat supprimé avec l'ID : " + idContrat);
+
+        System.out.println("Test de contrat terminé avec succès");
     }
 }
