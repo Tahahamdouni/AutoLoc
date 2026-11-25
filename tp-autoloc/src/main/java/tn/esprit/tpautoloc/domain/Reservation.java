@@ -2,10 +2,7 @@ package tn.esprit.tpautoloc.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import tn.esprit.tpautoloc.domain.enums.CategorieVehicule;
 import tn.esprit.tpautoloc.domain.enums.StatuReservation;
 import tn.esprit.tpautoloc.domain.enums.StatutVehicule;
@@ -17,6 +14,7 @@ import java.time.LocalDate;
 @Table(name = "reservation")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -39,7 +37,7 @@ public class Reservation {
     @JoinColumn(name = "id_vehicule")
     private Vehicule vehicule;
 
-    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "reservation")
     @JsonBackReference("reservation-contrat")
     private Contrat contrat;
 

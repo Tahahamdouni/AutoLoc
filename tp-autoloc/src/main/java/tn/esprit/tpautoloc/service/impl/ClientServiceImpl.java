@@ -6,6 +6,8 @@ import tn.esprit.tpautoloc.domain.Client;
 import tn.esprit.tpautoloc.exception.ResourceNotFoundException;
 import tn.esprit.tpautoloc.repository.IClientRepository;
 import tn.esprit.tpautoloc.service.IClientService;
+import tn.esprit.tpautoloc.web.dto.ClientDTO;
+import tn.esprit.tpautoloc.web.mapper.ClientMapper;
 
 import java.util.List;
 
@@ -14,37 +16,47 @@ import java.util.List;
 public class ClientServiceImpl implements IClientService {
 
     private final IClientRepository clientRepository;
+    private final ClientMapper clientMapper;
 
     @Override
-    public Client create(Client client) {
-        if (client.getIdClient() != null) {
+    public ClientDTO create(ClientDTO dto) {
+        if (dto.getId() != null) {
             throw new IllegalArgumentException(
                     "Un nouveau client ne doit pas avoir d'identifiant");
         }
-        return clientRepository.save(client);
+        Client client = clientMapper.toEntity(dto);
+        Client saved = clientRepository.save(client);
+        return clientMapper.toDto(saved);
     }
 
     @Override
-    public Client findById(Long id) {
-        return clientRepository.findById(id)
+    public ClientDTO findById(Long id) {
+        Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Client", id));
+        return clientMapper.toDto(client);
     }
 
     @Override
-    public List<Client> findAll() {
-        return clientRepository.findAll();
+    public List<ClientDTO> findAll() {
+        return clientRepository.findAll().stream()
+                .map(clientMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Client update(Long id, Client client) {
-        Client existant = findById(id);
-        existant.setNom(client.getNom());
-        existant.setPrenom(client.getPrenom());
-        existant.setEmail(client.getEmail());
-        existant.setTelephone(client.getTelephone());
-        existant.setNumPermis(client.getNumPermis());
-        existant.setDateInscription(client.getDateInscription());
-        return clientRepository.save(existant);
+    public ClientDTO update(Long id, ClientDTO dto) {
+        Client existant = clientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Client", id));
+
+        existant.setNom(dto.getNom());
+        existant.setPrenom(dto.getPrenom());
+        existant.setEmail(dto.getEmail());
+        existant.setTelephone(dto.getTelephone());
+        existant.setNumPermis(dto.getNumPermis());
+        existant.setDateInscription(dto.getDateInscription());
+
+        Client updated = clientRepository.save(existant);
+        return clientMapper.toDto(updated);
     }
 
     @Override

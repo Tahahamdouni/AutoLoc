@@ -1,10 +1,7 @@
 package tn.esprit.tpautoloc.domain;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import tn.esprit.tpautoloc.domain.enums.CategorieVehicule;
 import tn.esprit.tpautoloc.domain.enums.StatutVehicule;
 
@@ -16,6 +13,7 @@ import java.util.List;
 @Table(name = "client")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Client {
